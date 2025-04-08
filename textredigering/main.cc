@@ -7,7 +7,7 @@
 #include <iterator>
 #include <map>
 #include <iomanip>
-#include <unordered_map>
+#include <stdexcept>
 
 std::vector<std::string> read_file(std::string const& filename)
 {
@@ -85,7 +85,8 @@ void remove(std::string const& word, std::vector<std::string> & text)
 
 void replace(std::string const& words, std::vector<std::string> & text)
 {
-    // Får in parameter typ: hej+då byt ut hej mot då boom ANVÄND std::replace
+    auto it = words.find('+');
+    std::replace(text.begin(), text.end(), words.substr(0, it), words.substr(it + 1));
 }
 
 std::map<std::string, int> get_frequency(std::vector<std::string> const& text)
@@ -140,7 +141,6 @@ void print_frequency(std::map<std::string, int> const& items,
     });
 }
 
-
 void print_table(std::map<std::string, int> const& items,
                  std::vector<std::string> const& text)
 {
@@ -165,11 +165,16 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+    if (argc < 3)
+    {
+        throw invalid_argument("Too few arguments");
+    }
+
     vector<string> text      { read_file(argv[1]) };
     vector<string> arguments { get_args(argc, argv) };
     vector<string> flags     { get_flags(arguments) };
     vector<string> parameters{ get_parameters(arguments) };
-
+    
     for (size_t i{}; i < flags.size(); ++i)
     {
         if (flags.at(i) == "--print")
@@ -192,8 +197,10 @@ int main(int argc, char* argv[])
         {
             print_table(get_frequency(text), text);
         }
+        else
+        {
+            cout << "Invalid argument!" << endl;
+        }
     }
-
-     
     return 0;
 }
